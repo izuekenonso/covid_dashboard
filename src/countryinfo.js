@@ -227,7 +227,7 @@ export default class CountryInfo extends Component {
             <SafeAreaView style={ container }>
                 <ScrollView style={{ paddingHorizontal: 20 }}>
                     <View style={ homePageIntroText }>
-                        <Text>Daily New Cases for 30 days</Text>
+                        <Text>Daily New Cases for 8 days</Text>
                     </View>
 
                     
