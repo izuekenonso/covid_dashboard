@@ -59,7 +59,7 @@ export default class CountryInfo extends Component {
                     "Response",
                     "No record found",
                     [
-                        { text: "OK", onPress: () => console.log('No record found') }
+                        { text: "OK", onPress: () => this.props.navigation.goBack() }
                     ],
                     { cancelable: false }
                 );
@@ -120,7 +120,7 @@ export default class CountryInfo extends Component {
 
     renderPage() {
 
-        const { container, homePageIntroText, cardCases, cardCasesLeft, cardCasesRight, homePageBarChart, lastCardMarginBottom, deathFont } = styles;
+        const { container, homePageIntroText, cardCases, cardCasesLeft, cardCasesRight, homePageBarChart, lastCardMarginBottom, deathFont, recoveredFont, generalCasesFont } = styles;
 
         const data = {
             labels: ["January", "February", "March", "April", "May", "June"],

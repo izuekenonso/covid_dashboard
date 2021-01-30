@@ -126,9 +126,9 @@ export default class Countries extends Component {
     search = (searchText) => {
         this.setState({searchText: searchText});
         
-        console.log(this.state.countries)
         let filteredCountries = this.state.countries.filter(function (item) {
-          return item.name.includes(searchText);
+            
+          return item.name.toLowerCase().includes(searchText.toLowerCase());
         });
       
         this.setState({filteredCountries: filteredCountries});
