@@ -131,6 +131,7 @@ export default class Countries extends Component {
           return item.name.toLowerCase().includes(searchText.toLowerCase());
         });
       
+        // console.log(filteredCountries)
         this.setState({filteredCountries: filteredCountries});
     };
 

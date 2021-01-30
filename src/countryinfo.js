@@ -19,10 +19,12 @@ export default class CountryInfo extends Component {
 
             totalCases:     'loading...',
             newCases:       'loading...',
-            newDeaths:      'loading...',
+            
             totalDeaths:    'loading...',
-            newRecovered:   'loading...',
+            newDeaths:      'loading...',
+
             totalRecovered: 'loading...',
+            newRecovered:   'loading...',
 
 
 
@@ -31,17 +33,15 @@ export default class CountryInfo extends Component {
 
     componentDidMount() {
         this.props.navigation.setOptions({title: this.state.country_name});
-        
-        this.getLiveData();
-
+        this.getData();
         
     }
 
 
 
-    getLiveData = async () =>{
+    getData = async () =>{
 
-        fetch(IpAddress+'live/country/'+this.state.slug, {
+        fetch(IpAddress+'summary', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -52,7 +52,7 @@ export default class CountryInfo extends Component {
         .then((response) => response.json())
         .then((responseJson) => {
             // console.log('=========')
-            // console.log(responseJson[0]);
+
             if (responseJson == null || responseJson.length == 0) {
 
                 Alert.alert(
@@ -65,53 +65,58 @@ export default class CountryInfo extends Component {
                 );
                 
             }else {
-                this.setPageData(responseJson);
+                
+                console.log(pageslug);
+                var pageslug = this.state.slug;
+                var filteredRequest = responseJson.Countries.filter(function (item) {
+                    return item.Slug.toLowerCase().includes(pageslug.toLowerCase());
+                    
+                });
+
+                console.log(filteredRequest);
+                this.setPageData(filteredRequest);
             }
       
         })
         .catch((error) => {
-          console.log(error)
+
+            console.log(error);
+
+            Alert.alert(
+                "Error",
+                "Unable to fetch this record. \nIf this error persists, it's likely that the data for the selected country/province might be unavailable",
+                [
+                    { text: "OK", onPress: () => this.props.navigation.goBack() }
+                ],
+                { cancelable: false }
+            );
         });
     }
 
 
 
-    // getTotaleData = async () =>{
-
-    //     fetch(IpAddress+'total/country/'+this.state.slug, {
-    //         method: 'GET',
-    //         headers: {
-    //             'Accept': 'application/json',
-    //             'Content-Type': 'application/json',
-    //             'X-Access-Token': XAccessToken,
-    //         }
-    //     })
-    //     .then((response) => response.json())
-    //     .then((responseJson) => {
-    //         // console.log('=========')
-    //         console.log(responseJson[0]);
-    //         this.setPageData(responseJson);
-      
-    //     })
-    //     .catch((error) => {
-    //       console.log(error)
-    //     });
-    // }
 
 
     setPageData (countryInfo) {
 
+
         this.setState({
             data: false,
 
-            totalCases:     'loading...',
-            newCases:       countryInfo[0].Active,
-            newDeaths:      countryInfo[0].Deaths,
-            totalDeaths:    'loading...',
-            newRecovered:   countryInfo[0].Recovered,
-            totalRecovered: 'loading...',
+            newCases:       countryInfo[0].NewConfirmed,
+            totalCases:     countryInfo[0].TotalConfirmed,
+
+            newDeaths:      countryInfo[0].NewDeaths,
+            totalDeaths:    countryInfo[0].TotalDeaths,
+
+            newRecovered:   countryInfo[0].NewRecovered,
+            totalRecovered: countryInfo[0].TotalRecovered
 
             
+
+            // NewConfirmed": 0, "NewDeaths": 0, "NewRecovered": 0, "Premium": {}, "Slug": "afghanistan", "TotalConfirmed": 54939, "TotalDeaths": 2399, "TotalRecovered"
+
+
         })
     }
 
