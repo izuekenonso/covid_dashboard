@@ -14,7 +14,17 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator
+          screenOptions={{
+            headerTintColor: '#FFF',
+            headerStyle:{
+              backgroundColor: '#222222',
+            },
+            headerTitleStyle: {
+              color: '#FFF',
+            }
+          }}
+        >
           <Stack.Screen name="Home" component={Home} options={{ title: "Global Statistics", headerTitleAlign: 'center'}} />
           
           <Stack.Screen name="Countries" component={Countries} options={{ title: "Countries", headerTitleAlign: 'center'}} />
