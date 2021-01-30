@@ -45,6 +45,9 @@ export default class CountryInfo extends Component {
 
         let countrySlug = this.state.slug;   
 
+        // console.log(IpAddress+'country/'+countrySlug+'/status/confirmed?from='+oneWeekAgo.substring(0, 10)+'&to='+today.substring(0, 10));
+        // return;
+        
         this.getCountries(countrySlug, today, oneWeekAgo);
     }
 
@@ -61,14 +64,34 @@ export default class CountryInfo extends Component {
         })
         .then((response) => response.json())
         .then((responseJson) => {
-            console.log('=========');
-            // console.log(responseJson);
+            // console.log('=========');
+            // console.log(responseJson.length);
 
-            this.processData(responseJson);
+            if (responseJson.length == 0 || responseJson.length == undefined || responseJson.length == null) {
+                Alert.alert(
+                    "Response",
+                    "Could not find data",
+                    [
+                        { text: "OK", onPress: () => this.props.navigation.goBack() }
+                    ],
+                    { cancelable: false }
+                );
+            }else {
+                this.processData(responseJson);
+            }
       
         })
         .catch((error) => {
-          console.log(error)
+            console.log(error);
+
+            Alert.alert(
+                "Error",
+                "An error occured: " + error,
+                [
+                    { text: "OK", onPress: () => this.props.navigation.goBack() }
+                ],
+                { cancelable: false }
+            );
         });
     }
 
