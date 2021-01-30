@@ -14,14 +14,99 @@ export default class Home extends Component {
         super(props);
 
         this.state = {
-            totalCases: 'loading...'
+            totalCases: 'loading...',
+            barChartCases: [0],
+            barChartLabel: [0],
         };
     }
 
 
     componentDidMount () {
         this.getData();
+
+        let today = new Date().toISOString();
+
+        let oneWeekAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+
+        let countrySlug = "angola";   
+
+        this.getCountries(countrySlug, today, oneWeekAgo);
+
     }
+
+
+    getCountries = async (countrySlug, today, oneWeekAgo) => {
+
+        fetch(IpAddress+'country/'+countrySlug+'/status/confirmed?from='+oneWeekAgo.substring(0, 10)+'&to='+today.substring(0, 10), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Access-Token': XAccessToken,
+            }
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+            console.log('=========');
+            // console.log(responseJson);
+
+            this.processData(responseJson);
+      
+        })
+        .catch((error) => {
+          console.log(error)
+        });
+    }
+
+    
+
+    processData(responseJson) {
+
+        let barChartLabel = [];
+        let barChartCases = [];
+        
+        for (let i = 0; i < responseJson.length; i++) {
+
+            if (i < responseJson.length-1) {
+                let res = responseJson[i+1].Cases - responseJson[i].Cases
+
+                barChartLabel.push(responseJson[i+1].Date.substring(0, 10));
+                barChartCases.push(res);
+                
+            }
+        }
+        console.log(barChartCases);
+        console.log(barChartLabel);
+
+        this.setState({barChartCases: barChartCases, barChartLabel: barChartLabel });
+    }
+
+
+
+
+    getChartData = async () =>{
+
+        fetch(IpAddress+'summary', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Access-Token': XAccessToken
+            }
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+            // console.log('=========')
+            // console.log(responseJson.Global);
+
+            this.setPageData(responseJson.Global);
+      
+        })
+        .catch((error) => {
+          console.log(error)
+        });
+    }
+
 
     getData = async () =>{
 
@@ -67,10 +152,10 @@ export default class Home extends Component {
         const { container, homePageIntroText, cardCases, cardCasesLeft, cardCasesRight, homePageBarChart, searchByCountryButtonSection, searchByCountryText, generalCasesFont, deathFont, recoveredFont } = styles;
 
         const data = {
-            labels: ["January", "February", "March", "April", "May", "June"],
+            labels: this.state.barChartLabel,
             datasets: [
               {
-                data: [20, 45, 28, 80, 99, 43]
+                data: this.state.barChartCases
               }
             ]
         };
@@ -80,7 +165,7 @@ export default class Home extends Component {
             <SafeAreaView style={ container }>
                 <ScrollView style={{ paddingHorizontal: 20 }}>
                     <View style={ homePageIntroText }>
-                        <Text>Daily New Cases for past week</Text>
+                        <Text>Daily New Cases for past week (Angola)</Text>
                     </View>
 
 
@@ -88,13 +173,13 @@ export default class Home extends Component {
                         style={ homePageBarChart }
                         data={data}
                         width={screenWidth}
-                        height={220}
-                        yAxisLabel="$"
+                        height={300}
+                        yAxisSuffix="k"
                         chartConfig={{
                             backgroundColor: "#5382B2",
                             backgroundGradientFrom: "#5382B2",
                             backgroundGradientTo: "#5382B2",
-                            decimalPlaces: 2, // optional, defaults to 2dp
+                            decimalPlaces: 0, // optional, defaults to 2dp
                             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                             labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                             style: {

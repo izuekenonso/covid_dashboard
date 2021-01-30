@@ -27,6 +27,10 @@ export default class CountryInfo extends Component {
             newRecovered:   'loading...',
 
 
+            lineChartCases: [0],
+            lineChartLabel: [0],
+
+
 
         }
     }
@@ -35,9 +39,66 @@ export default class CountryInfo extends Component {
         this.props.navigation.setOptions({title: this.state.country_name});
         this.getData();
         
+        let today = new Date().toISOString();
+
+        let oneWeekAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+
+        let countrySlug = this.state.slug;   
+
+        this.getCountries(countrySlug, today, oneWeekAgo);
     }
 
 
+    getCountries = async (countrySlug, today, oneWeekAgo) => {
+
+        fetch(IpAddress+'country/'+countrySlug+'/status/confirmed?from='+oneWeekAgo.substring(0, 10)+'&to='+today.substring(0, 10), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Access-Token': XAccessToken,
+            }
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+            console.log('=========');
+            // console.log(responseJson);
+
+            this.processData(responseJson);
+      
+        })
+        .catch((error) => {
+          console.log(error)
+        });
+    }
+
+    
+
+    processData(responseJson) {
+
+        let lineChartLabel = [];
+        let lineChartCases = [];
+        
+        for (let i = 0; i < responseJson.length; i++) {
+
+            if (i < responseJson.length-1) {
+                let res = responseJson[i+1].Cases - responseJson[i].Cases
+
+                lineChartLabel.push(responseJson[i+1].Date.substring(0, 10));
+                lineChartCases.push(res);
+                
+            }
+        }
+
+        console.log("=======")
+        console.log(lineChartCases);
+        console.log(lineChartLabel);
+
+        this.setState({lineChartCases: lineChartCases, lineChartLabel: lineChartLabel });
+    }
+
+
+    
 
     getData = async () =>{
 
@@ -66,14 +127,13 @@ export default class CountryInfo extends Component {
                 
             }else {
                 
-                console.log(pageslug);
                 var pageslug = this.state.slug;
                 var filteredRequest = responseJson.Countries.filter(function (item) {
                     return item.Slug.toLowerCase().includes(pageslug.toLowerCase());
                     
                 });
 
-                console.log(filteredRequest);
+                // console.log(filteredRequest);
                 this.setPageData(filteredRequest);
             }
       
@@ -128,15 +188,14 @@ export default class CountryInfo extends Component {
         const { container, homePageIntroText, cardCases, cardCasesLeft, cardCasesRight, homePageBarChart, lastCardMarginBottom, deathFont, recoveredFont, generalCasesFont } = styles;
 
         const data = {
-            labels: ["January", "February", "March", "April", "May", "June"],
+            labels: this.state.lineChartLabel,
             datasets: [
                 {
-                data: [20, 45, 28, 80, 99, 43],
+                data: this.state.lineChartCases,
                 color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
                 strokeWidth: 2 // optional
                 }
             ],
-            legend: ["Rainy Days"] // optional
         };
 
 
@@ -155,9 +214,10 @@ export default class CountryInfo extends Component {
                     
                     <LineChart
                         style={ homePageBarChart }
+                        verticalLabelRotation={30}
                         data={data}
                         width={screenWidth}
-                        height={220}
+                        height={300}
                         chartConfig = {{
                             backgroundColor: "#5382B2",
                             backgroundGradientFrom: "#5382B2",
